@@ -1,0 +1,13 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: ryandev-ru-wildcard
+  namespace: kube-system
+spec:
+  secretName: ryandev-ru-wildcard-tls
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+  dnsNames:
+    - ryandev.ru
+    - "*.ryandev.ru"
