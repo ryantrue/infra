@@ -3,10 +3,13 @@ kind: Service
 metadata:
   name: homeassistant
   namespace: homeassistant
+  labels:
+    app.kubernetes.io/name: homeassistant
+    app.kubernetes.io/part-of: infra
 spec:
   selector:
-    app: homeassistant
+    app.kubernetes.io/name: homeassistant
   ports:
     - name: http
       port: 8123
-      targetPort: 8123
+      targetPort: http

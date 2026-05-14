@@ -3,6 +3,9 @@ kind: PersistentVolumeClaim
 metadata:
   name: homeassistant-config
   namespace: homeassistant
+  labels:
+    app.kubernetes.io/name: homeassistant
+    app.kubernetes.io/part-of: infra
 spec:
   accessModes:
     - ReadWriteOnce

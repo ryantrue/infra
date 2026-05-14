@@ -3,6 +3,9 @@ kind: Certificate
 metadata:
   name: ryandev-ru-wildcard
   namespace: kube-system
+  labels:
+    app.kubernetes.io/name: ryandev-ru-wildcard
+    app.kubernetes.io/part-of: infra
 spec:
   secretName: ryandev-ru-wildcard-tls
   issuerRef:
@@ -11,3 +14,5 @@ spec:
   dnsNames:
     - ryandev.ru
     - "*.ryandev.ru"
+  privateKey:
+    rotationPolicy: Always

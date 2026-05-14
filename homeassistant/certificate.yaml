@@ -3,6 +3,9 @@ kind: Certificate
 metadata:
   name: home-ryandev-ru
   namespace: homeassistant
+  labels:
+    app.kubernetes.io/name: homeassistant
+    app.kubernetes.io/part-of: infra
 spec:
   secretName: home-ryandev-ru-tls
   issuerRef:
@@ -10,3 +13,5 @@ spec:
     kind: ClusterIssuer
   dnsNames:
     - home.ryandev.ru
+  privateKey:
+    rotationPolicy: Always
