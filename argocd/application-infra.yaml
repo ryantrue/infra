@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: git@github.com:zufirka/infra.git
+    repoURL: git@github.com:ryantrue/infra.git
     targetRevision: main
     path: .
     directory:
