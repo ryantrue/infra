@@ -1,19 +1,17 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: infra
+  name: traefik-infra
   namespace: argocd
 spec:
   project: default
   source:
     repoURL: git@github.com:ryantrue/infra.git
     targetRevision: main
-    path: argocd/apps
-    directory:
-      recurse: true
+    path: traefik
   destination:
     server: https://kubernetes.default.svc
-    namespace: argocd
+    namespace: kube-system
   syncPolicy:
     automated:
       prune: false
