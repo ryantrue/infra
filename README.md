@@ -62,6 +62,12 @@ https://traefik.ryandev.ru/dashboard/
 
 Dashboard защищён Basic Auth middleware.
 
+Traefik установлен k3s как системный компонент.
+
+PVC:
+
+- kube-system/traefik, 128Mi, local-path
+
 Ожидаемый ответ без авторизации:
 
 HTTP/2 401
@@ -87,6 +93,7 @@ HTTP/2 405
 ## Структура репозитория
 
 ~/infra
+├── .gitignore
 ├── README.md
 ├── cert-manager
 │   ├── namespace.yaml
