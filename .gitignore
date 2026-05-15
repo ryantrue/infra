@@ -1,5 +1,21 @@
+# Local env / secrets
 .env
 *.env
-*.log
+traefik/.env
+
+# Local backups / archives
 .backup/
+*.bak
+*.backup
+*.old
+*.tmp
+*~
+*.tar
+*.tar.gz
+*.tgz
+*.zip
+
+# OS / editor
 .DS_Store
+.vscode/
+.idea/
