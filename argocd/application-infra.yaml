@@ -14,6 +14,13 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd
+  ignoreDifferences:
+    - group: argoproj.io
+      kind: Application
+      name: infra
+      namespace: argocd
+      jsonPointers:
+        - /
   syncPolicy:
     automated:
       prune: false
