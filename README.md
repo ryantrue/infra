@@ -153,3 +153,17 @@ Apple Home подключается через HomeKit Bridge.
 - cert-manager отвечает за TLS
 - Cloudflare отвечает за DNS
 - Home Assistant — центральный контроллер
+
+## Argo CD notes
+
+Argo CD доступен по:
+
+https://argocd.ryandev.ru
+
+GitOps application:
+
+- argocd/infra
+- repo: git@github.com:ryantrue/infra.git
+- status: Synced / Healthy
+
+Redis image был переключён с public.ecr.aws/docker/library/redis:8.2.3-alpine на redis:8.2.3-alpine из-за timeout при pull с public.ecr.aws.
