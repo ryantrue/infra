@@ -7,7 +7,7 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`traefik.ryantrue.com`)
+    - match: Host(`traefik.ryantrue.ru`)
       kind: Rule
       services:
         - name: api@internal
