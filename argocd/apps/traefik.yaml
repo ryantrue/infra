@@ -6,9 +6,21 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: git@github.com:ryantrue/infra.git
-    targetRevision: main
-    path: traefik
+    repoURL: https://traefik.github.io/charts
+    chart: traefik
+    targetRevision: "*"
+    helm:
+      releaseName: traefik
+      valuesObject:
+        deployment:
+          replicas: 1
+        service:
+          type: LoadBalancer
+        providers:
+          kubernetesCRD:
+            enabled: true
+          kubernetesIngress:
+            enabled: true
   destination:
     server: https://kubernetes.default.svc
     namespace: kube-system
