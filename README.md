@@ -167,3 +167,53 @@ GitOps application:
 - status: Synced / Healthy
 
 Redis image был переключён с public.ecr.aws/docker/library/redis:8.2.3-alpine на redis:8.2.3-alpine из-за timeout при pull с public.ecr.aws.
+
+## Managed components
+
+### Argo CD
+
+Namespace:
+
+argocd
+
+Argo CD установлен как platform-компонент и частично описан в:
+
+argocd/platform/
+
+В Git управляются:
+
+- namespace
+- server insecure config
+- certificate
+- ingressroute
+
+Deployment'ы Argo CD пока не описаны в этом репозитории.
+
+### cert-manager
+
+Namespace:
+
+cert-manager
+
+В Git управляются:
+
+- namespace
+- ClusterIssuer letsencrypt-prod
+- certificates
+
+Deployment'ы cert-manager пока не описаны в этом репозитории.
+
+### Traefik
+
+Namespace:
+
+kube-system
+
+Traefik установлен k3s как системный Helm-компонент.
+
+В Git управляются только:
+
+- IngressRoute
+- Middleware
+
+Deployment Traefik пока не описан в этом репозитории.
