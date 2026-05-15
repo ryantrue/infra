@@ -8,7 +8,7 @@ spec:
   source:
     repoURL: https://traefik.github.io/charts
     chart: traefik
-    targetRevision: "*"
+    targetRevision: "40.2.0"
     helm:
       releaseName: traefik
       valuesObject:
@@ -26,7 +26,8 @@ spec:
     namespace: kube-system
   syncPolicy:
     automated:
-      prune: false
+      prune: true
       selfHeal: true
     syncOptions:
-      - ServerSideApply=true
+      - Replace=true
+      - CreateNamespace=true
