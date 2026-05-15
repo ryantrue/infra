@@ -7,7 +7,7 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`traefik.ryantrue.ru`) && (PathPrefix(`/dashboard`) || PathPrefix(`/api`))
+    - match: Host(`traefik.ryandev.ru`) && (PathPrefix(`/dashboard`) || PathPrefix(`/api`))
       kind: Rule
       middlewares:
         - name: basic-auth
@@ -15,4 +15,4 @@ spec:
         - name: api@internal
           kind: TraefikService
   tls:
-    secretName: ryantrue-ru-wildcard-tls
+    secretName: ryandev-ru-wildcard-tls
