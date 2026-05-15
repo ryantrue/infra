@@ -1,0 +1,27 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: argocd-server
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: argocd
+    app.kubernetes.io/part-of: infra
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`argocd.ryandev.ru`)
+      priority: 10
+      services:
+        - name: argocd-server
+          port: 80
+    - kind: Rule
+      match: Host(`argocd.ryandev.ru`) && Header(`Content-Type`, `application/grpc`)
+      priority: 11
+      services:
+        - name: argocd-server
+          port: 80
+          scheme: h2c
+  tls:
+    secretName: argocd-ryandev-ru-tls
