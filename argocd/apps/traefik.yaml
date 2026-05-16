@@ -23,12 +23,11 @@ spec:
             enabled: true
         service:
           type: NodePort
-          spec:
-            ports:
-              web:
-                nodePort: 30080
-              websecure:
-                nodePort: 30443
+        ports:
+          web:
+            nodePort: 30080
+          websecure:
+            nodePort: 30443
   destination:
     server: https://kubernetes.default.svc
     namespace: kube-system
