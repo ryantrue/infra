@@ -41,7 +41,7 @@ spec:
                 trusted_proxies:
                   - 10.42.0.0/16
                   - 10.43.0.0/16
-                  - 192.168.31.0/24
+                  - 192.168.1.0/24
               CFG
               fi
           volumeMounts:

@@ -14,7 +14,7 @@
 
 - Hostname: infra-master
 - OS: Debian GNU/Linux 13
-- Node IP: 192.168.31.160
+- Node IP: 192.168.1.10
 - Public IP: 95.84.134.162
 - Domain: ryandev.ru
 - SSH: 2222/tcp, key-only
