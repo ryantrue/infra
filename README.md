@@ -150,14 +150,7 @@ Local path:
 
 ## Backup
 
-Backup path:
-
-/home/ryan/migration-backup-20260516/homeassistant/
-
-Contains:
-
-- config/
-- config-stopped/
+Локальные migration-backup директории не хранятся постоянно и удаляются после проверки.
 
 Consistent backup procedure:
 
