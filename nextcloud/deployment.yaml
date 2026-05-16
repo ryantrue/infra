@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nextcloud
+  namespace: nextcloud
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: nextcloud
+  template:
+    metadata:
+      labels:
+        app: nextcloud
+    spec:
+      containers:
+        - name: nextcloud
+          image: nextcloud:stable-apache
+          envFrom:
+            - secretRef:
+                name: nextcloud-secrets
+          env:
+            - name: POSTGRES_HOST
+              value: nextcloud-postgres
+            - name: NEXTCLOUD_TRUSTED_DOMAINS
+              value: cloud.ryandev.ru
+            - name: OVERWRITEHOST
+              value: cloud.ryandev.ru
+            - name: OVERWRITEPROTOCOL
+              value: https
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: data
+              mountPath: /var/www/html
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: nextcloud-data
