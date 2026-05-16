@@ -8,21 +8,27 @@ spec:
   source:
     repoURL: https://traefik.github.io/charts
     chart: traefik
-    targetRevision: "40.2.0"
+    targetRevision: 40.2.0
     helm:
       releaseName: traefik
       valuesObject:
+        api:
+          dashboard: true
         deployment:
           replicas: 1
-        service:
-          type: LoadBalancer
         providers:
           kubernetesCRD:
             enabled: true
           kubernetesIngress:
             enabled: true
-        api:
-          dashboard: true
+        service:
+          type: NodePort
+          spec:
+            ports:
+              web:
+                nodePort: 30080
+              websecure:
+                nodePort: 30443
   destination:
     server: https://kubernetes.default.svc
     namespace: kube-system
