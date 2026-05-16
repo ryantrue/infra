@@ -1,54 +1,55 @@
 # Infra
 
-Домашняя инфраструктура на single-node k3s-кластере.
+Домашняя инфраструктура на single-node Kubernetes-кластере.
 
-## Компоненты
+## Текущее состояние
 
-- k3s
-- Traefik
-- cert-manager
-- Home Assistant
-- Cloudflare DNS
-
-## Сервер
-
-- Hostname: infra-master
+- Node: infra-master
 - OS: Debian GNU/Linux 13
+- Kubernetes: v1.36.1
+- Runtime: containerd
 - Node IP: 192.168.1.10
 - Public IP: 95.84.134.162
 - Domain: ryandev.ru
-- SSH: 2222/tcp, key-only
+- Git repo: git@github.com:ryantrue/infra.git
 
-## DNS
+## Архитектура
 
-DNS управляется через Cloudflare.
+- GitOps через Argo CD
+- Один ingress controller: Traefik в kube-system
+- TLS через cert-manager и Cloudflare DNS-01
+- Home Assistant в namespace homeassistant
+- Persistent storage через local-path
+- Home Assistant PV переведён в Retain
+- Ручной Helm Traefik из namespace traefik удалён
 
-Wildcard DNS:
+## Компоненты
 
-*.ryandev.ru
+- Argo CD: argocd
+- cert-manager: cert-manager
+- Traefik: kube-system
+- Home Assistant: homeassistant
+- local-path-provisioner: local-path-storage
+- kube-flannel: kube-flannel
 
-указывает на:
+## Argo CD
 
-95.84.134.162
+URL:
 
-SSH-related records должны быть DNS only.
+https://argocd.ryandev.ru
 
-## TLS
+Applications:
 
-TLS выпускает cert-manager через ACME DNS-01 Cloudflare challenge.
+- infra
+- argocd-platform
+- cert-manager-infra
+- homeassistant
+- traefik-infra
+- traefik-routes
 
-ClusterIssuer:
+Ожидаемое состояние:
 
-letsencrypt-prod
-
-Cloudflare API token Secret:
-
-cert-manager/cloudflare-api-token
-
-Сертификаты:
-
-- kube-system/ryandev-ru-wildcard-tls
-- homeassistant/home-ryandev-ru-tls
+Synced / Healthy
 
 ## Traefik
 
@@ -56,21 +57,62 @@ Namespace:
 
 kube-system
 
+Service:
+
+kube-system/traefik
+
+Type:
+
+NodePort
+
+Ports:
+
+- HTTP: 30080
+- HTTPS: 30443
+
+Published service:
+
+kube-system/traefik
+
 Dashboard:
 
 https://traefik.ryandev.ru/dashboard/
 
 Dashboard защищён Basic Auth middleware.
 
-Traefik установлен k3s как системный компонент.
+## cert-manager
 
-PVC:
+Namespace:
 
-- kube-system/traefik, 128Mi, local-path
+cert-manager
 
-Ожидаемый ответ без авторизации:
+ClusterIssuer:
 
-HTTP/2 401
+letsencrypt-prod
+
+ACME challenge:
+
+Cloudflare DNS-01
+
+Cloudflare token secret:
+
+cert-manager/cloudflare-api-token
+
+Certificates:
+
+- argocd/argocd-ryandev-ru
+- homeassistant/home-ryandev-ru
+- kube-system/ryandev-ru-wildcard
+
+## DNS
+
+DNS управляется через Cloudflare.
+
+Wildcard record:
+
+*.ryandev.ru -> 95.84.134.162
+
+SSH-related records должны быть DNS only.
 
 ## Home Assistant
 
@@ -80,155 +122,85 @@ homeassistant
 
 URL:
 
-https://home.ryandev.ru/
+https://home.ryandev.ru
 
-Home Assistant опубликован через Traefik IngressRoute.
+Service:
 
-Ожидаемый ответ на HEAD-запрос:
+homeassistant/homeassistant:8123
 
-HTTP/2 405
+PVC:
 
-Это нормально, потому что Home Assistant ожидает GET.
+homeassistant/homeassistant-config
 
-## Структура репозитория
+PV:
 
-~/infra
-├── .gitignore
-├── README.md
-├── cert-manager
-│   ├── namespace.yaml
-│   ├── clusterissuer-letsencrypt-prod.yaml
-│   └── wildcard-ryandev-ru.yaml
-├── homeassistant
-│   ├── namespace.yaml
-│   ├── pvc.yaml
-│   ├── deployment.yaml
-│   ├── service.yaml
-│   ├── certificate.yaml
-│   └── ingressroute.yaml
-└── traefik
-    ├── middlewares.yaml
-    └── traefik-dashboard.yaml
+pvc-9aff2ea0-e474-4975-aa78-2d99f4bb9824
 
-## Применение
+StorageClass:
 
-kubectl apply -f cert-manager/
-kubectl apply -f homeassistant/
-kubectl apply -f traefik/
+local-path
+
+ReclaimPolicy:
+
+Retain
+
+Local path:
+
+/opt/local-path-provisioner/pvc-9aff2ea0-e474-4975-aa78-2d99f4bb9824_homeassistant_homeassistant-config
+
+## Backup
+
+Backup path:
+
+/home/ryan/migration-backup-20260516/homeassistant/
+
+Contains:
+
+- config/
+- config-stopped/
+
+Consistent backup procedure:
+
+    kubectl scale deploy homeassistant -n homeassistant --replicas=0
+    kubectl rollout status deploy/homeassistant -n homeassistant
+    sudo rsync -aHAX --numeric-ids /opt/local-path-provisioner/pvc-9aff2ea0-e474-4975-aa78-2d99f4bb9824_homeassistant_homeassistant-config/ ~/migration-backup-$(date +%Y%m%d)/homeassistant/config-stopped/
+    kubectl scale deploy homeassistant -n homeassistant --replicas=1
+    kubectl rollout status deploy/homeassistant -n homeassistant
+
+## Repository layout
+
+    ~/infra
+    ├── argocd
+    ├── cert-manager
+    ├── homeassistant
+    ├── traefik
+    └── README.md
 
 ## Проверка
 
-kubectl get nodes -o wide
-kubectl get pods -A -o wide
-kubectl get certificate -A
-kubectl get ingressroute -A
+    kubectl get applications -n argocd
+    kubectl get pods -A
+    kubectl get svc -A
+    kubectl get ingressroutes.traefik.io -A
+    kubectl get certificates -A
+    kubectl get clusterissuer
+    kubectl get pvc -A
+    kubectl get pv
 
-curl -fsS https://home.ryandev.ru/ | head
-curl -I https://traefik.ryandev.ru/dashboard/
+## Git workflow
 
-## Home Assistant / Apple Home / Matter / Thread
-
-Apple Home подключается через HomeKit Bridge.
-
-Для Matter-over-Thread нужен Thread Border Router.
-
-Подходящие варианты:
-
-- Apple TV 4K
-- HomePod mini
-- HomePod 2nd gen
-- Home Assistant Connect ZBT-1/ZBT-2
-
-Для Zigbee рекомендуется отдельный coordinator:
-
-- Sonoff Zigbee 3.0 USB Dongle Plus
-- SMLIGHT SLZB
-- Home Assistant Connect ZBT-1/ZBT-2
+    cd ~/infra
+    git status
+    git add README.md
+    git commit -m "Update infrastructure README"
+    git push
 
 ## Принципы
 
-- Минимум лишних компонентов
-- Всё декларативно хранится в ~/infra
-- Traefik отвечает за ingress
-- cert-manager отвечает за TLS
-- Cloudflare отвечает за DNS
-- Home Assistant — центральный контроллер
-
-## Argo CD notes
-
-Argo CD доступен по:
-
-https://argocd.ryandev.ru
-
-GitOps application:
-
-- argocd/infra
-- repo: git@github.com:ryantrue/infra.git
-- status: Synced / Healthy
-
-Redis image был переключён с public.ecr.aws/docker/library/redis:8.2.3-alpine на redis:8.2.3-alpine из-за timeout при pull с public.ecr.aws.
-
-## Managed components
-
-### Argo CD
-
-Namespace:
-
-argocd
-
-Argo CD установлен как platform-компонент и частично описан в:
-
-argocd/platform/
-
-В Git управляются:
-
-- namespace
-- server insecure config
-- certificate
-- ingressroute
-
-Deployment'ы Argo CD пока не описаны в этом репозитории.
-
-### cert-manager
-
-Namespace:
-
-cert-manager
-
-В Git управляются:
-
-- namespace
-- ClusterIssuer letsencrypt-prod
-- certificates
-
-Deployment'ы cert-manager пока не описаны в этом репозитории.
-
-### Traefik
-
-Namespace:
-
-kube-system
-
-Traefik установлен k3s как системный Helm-компонент.
-
-В Git управляются только:
-
-- IngressRoute
-- Middleware
-
-Deployment Traefik пока не описан в этом репозитории.
-
-## k3s node network config
-
-Runtime file, not managed by this repo:
-
-`/etc/rancher/k3s/config.yaml`
-
-Content:
-
-    disable:
-      - traefik
-    node-ip: 192.168.1.10
-    node-external-ip: 192.168.1.10
-
-
+- Всё прикладное состояние хранится в Git
+- Один ingress controller
+- Секреты не коммитятся
+- TLS выпускает cert-manager
+- DNS управляется Cloudflare
+- Home Assistant хранит состояние в local-path PVC
+- Перед рискованными изменениями PV переводится в Retain и бэкапится
