@@ -232,19 +232,3 @@ Content:
     node-external-ip: 192.168.1.10
 
 
-## Runtime DNS override
-
-CoreDNS is managed by k3s as a system addon, but the live ConfigMap was patched
-because the default upstream resolver from `/etc/resolv.conf` pointed to the old
-LAN gateway `192.168.31.1`, which caused in-cluster DNS timeouts.
-
-Current live CoreDNS forwarder:
-
-    forward . 192.168.1.1 1.1.1.1 8.8.8.8
-
-Validation:
-
-    kubectl run dns-test --rm -it --restart=Never --image=busybox:1.36 -- nslookup github.com
-
-Expected result: DNS resolves from inside the cluster.
-
