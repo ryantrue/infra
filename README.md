@@ -217,3 +217,17 @@ Traefik установлен k3s как системный Helm-компонен
 - Middleware
 
 Deployment Traefik пока не описан в этом репозитории.
+
+## k3s node network config
+
+Runtime file, not managed by this repo:
+
+`/etc/rancher/k3s/config.yaml`
+
+Content:
+
+    disable:
+      - traefik
+    node-ip: 192.168.1.10
+    node-external-ip: 192.168.1.10
+
