@@ -23,7 +23,8 @@ spec:
             enabled: true
         service:
           single: true
-          type: NodePort
+          spec:
+            type: NodePort
         ports:
           web:
             nodePort: 30080
