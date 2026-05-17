@@ -3,8 +3,12 @@ kind: Deployment
 metadata:
   name: nextcloud
   namespace: nextcloud
+  labels:
+    app.kubernetes.io/name: nextcloud
+    app.kubernetes.io/part-of: nextcloud
 spec:
   replicas: 1
+  revisionHistoryLimit: 3
   strategy:
     type: Recreate
   selector:
@@ -14,10 +18,13 @@ spec:
     metadata:
       labels:
         app: nextcloud
+        app.kubernetes.io/name: nextcloud
+        app.kubernetes.io/part-of: nextcloud
     spec:
       containers:
         - name: nextcloud
           image: nextcloud:stable-apache
+          imagePullPolicy: IfNotPresent
           envFrom:
             - secretRef:
                 name: nextcloud-secrets
@@ -31,7 +38,36 @@ spec:
             - name: OVERWRITEPROTOCOL
               value: https
           ports:
-            - containerPort: 80
+            - name: http
+              containerPort: 80
+          readinessProbe:
+            httpGet:
+              path: /status.php
+              port: http
+              httpHeaders:
+                - name: Host
+                  value: cloud.ryandev.ru
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 12
+          livenessProbe:
+            httpGet:
+              path: /status.php
+              port: http
+              httpHeaders:
+                - name: Host
+                  value: cloud.ryandev.ru
+            initialDelaySeconds: 120
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 6
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              memory: 2Gi
           volumeMounts:
             - name: data
               mountPath: /var/www/html

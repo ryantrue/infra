@@ -1,0 +1,27 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: nextcloud
+  namespace: nextcloud
+  labels:
+    app.kubernetes.io/name: nextcloud
+    app.kubernetes.io/part-of: nextcloud
+spec:
+  maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: nextcloud
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: nextcloud-postgres
+  namespace: nextcloud
+  labels:
+    app.kubernetes.io/name: nextcloud-postgres
+    app.kubernetes.io/part-of: nextcloud
+spec:
+  maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: nextcloud-postgres
