@@ -8,7 +8,7 @@ spec:
   source:
     repoURL: https://github.com/ryantrue/infra.git
     targetRevision: main
-    path: cert-manager
+    path: platform/cert-manager
   destination:
     server: https://kubernetes.default.svc
     namespace: cert-manager

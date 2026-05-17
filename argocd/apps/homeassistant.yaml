@@ -8,7 +8,7 @@ spec:
   source:
     repoURL: https://github.com/ryantrue/infra.git
     targetRevision: main
-    path: homeassistant
+    path: apps/homeassistant
   destination:
     server: https://kubernetes.default.svc
     namespace: homeassistant
