@@ -1,12 +1,14 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: nextcloud-postgres
   namespace: nextcloud
+  labels:
+    app.kubernetes.io/name: nextcloud-postgres
+    app.kubernetes.io/part-of: nextcloud
 spec:
+  serviceName: nextcloud-postgres
   replicas: 1
-  strategy:
-    type: Recreate
   selector:
     matchLabels:
       app: nextcloud-postgres
@@ -14,10 +16,13 @@ spec:
     metadata:
       labels:
         app: nextcloud-postgres
+        app.kubernetes.io/name: nextcloud-postgres
+        app.kubernetes.io/part-of: nextcloud
     spec:
       containers:
         - name: postgres
           image: postgres:16-alpine
+          imagePullPolicy: IfNotPresent
           envFrom:
             - secretRef:
                 name: nextcloud-secrets
@@ -25,7 +30,34 @@ spec:
             - name: PGDATA
               value: /var/lib/postgresql/data/pgdata
           ports:
-            - containerPort: 5432
+            - name: postgres
+              containerPort: 5432
+          readinessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 6
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              memory: 1Gi
           volumeMounts:
             - name: data
               mountPath: /var/lib/postgresql/data
@@ -39,9 +71,13 @@ kind: Service
 metadata:
   name: nextcloud-postgres
   namespace: nextcloud
+  labels:
+    app.kubernetes.io/name: nextcloud-postgres
+    app.kubernetes.io/part-of: nextcloud
 spec:
   selector:
     app: nextcloud-postgres
   ports:
-    - port: 5432
-      targetPort: 5432
+    - name: postgres
+      port: 5432
+      targetPort: postgres
