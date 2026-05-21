@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: openproject
+  namespace: openproject
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: openproject
+  template:
+    metadata:
+      labels:
+        app: openproject
+    spec:
+      containers:
+        - name: openproject
+          image: openproject/openproject:16
+          ports:
+            - name: http
+              containerPort: 80
+          env:
+            - name: OPENPROJECT_HOST__NAME
+              value: jira.ryandev.ru
+            - name: OPENPROJECT_HTTPS
+              value: "true"
+            - name: OPENPROJECT_SECRET_KEY_BASE
+              value: change-me-long-random-secret-openproject
+          volumeMounts:
+            - name: data
+              mountPath: /var/openproject/assets
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              memory: 2Gi
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: openproject-data

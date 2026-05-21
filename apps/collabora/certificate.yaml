@@ -1,0 +1,12 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: office-ryandev-ru
+  namespace: collabora
+spec:
+  secretName: office-ryandev-ru-tls
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+  dnsNames:
+    - office.ryandev.ru
