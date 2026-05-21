@@ -40,6 +40,16 @@ spec:
           ports:
             - name: http
               containerPort: 80
+          startupProbe:
+            httpGet:
+              path: /status.php
+              port: http
+              httpHeaders:
+                - name: Host
+                  value: cloud.ryandev.ru
+            failureThreshold: 60
+            periodSeconds: 10
+            timeoutSeconds: 5
           readinessProbe:
             httpGet:
               path: /status.php
@@ -47,7 +57,7 @@ spec:
               httpHeaders:
                 - name: Host
                   value: cloud.ryandev.ru
-            initialDelaySeconds: 30
+            initialDelaySeconds: 60
             periodSeconds: 15
             timeoutSeconds: 5
             failureThreshold: 12
@@ -58,7 +68,7 @@ spec:
               httpHeaders:
                 - name: Host
                   value: cloud.ryandev.ru
-            initialDelaySeconds: 120
+            initialDelaySeconds: 300
             periodSeconds: 30
             timeoutSeconds: 5
             failureThreshold: 6
@@ -67,7 +77,7 @@ spec:
               cpu: 250m
               memory: 512Mi
             limits:
-              memory: 2Gi
+              memory: 3Gi
           volumeMounts:
             - name: data
               mountPath: /var/www/html
