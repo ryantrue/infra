@@ -21,6 +21,10 @@ spec:
         app.kubernetes.io/name: homeassistant
         app.kubernetes.io/part-of: infra
     spec:
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      nodeSelector:
+        kubernetes.io/hostname: infra-master
       securityContext:
         fsGroup: 1000
       initContainers:
@@ -42,6 +46,13 @@ spec:
                   - 10.244.0.0/16
                   - 10.96.0.0/12
                   - 192.168.1.0/24
+
+              homeassistant:
+                external_url: "https://home.ryandev.ru"
+                internal_url: "http://192.168.1.10:8123"
+
+              logger:
+                default: warning
               CFG
               fi
           volumeMounts:
@@ -49,19 +60,26 @@ spec:
               mountPath: /config
       containers:
         - name: homeassistant
-          image: ghcr.io/home-assistant/home-assistant:latest
+          image: ghcr.io/home-assistant/home-assistant:stable
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
               containerPort: 8123
           env:
             - name: TZ
-              value: Europe/Moscow
+              value: Europe/Stockholm
+          startupProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 30
           readinessProbe:
             httpGet:
               path: /
               port: http
-            initialDelaySeconds: 20
             periodSeconds: 15
             timeoutSeconds: 5
             failureThreshold: 6
@@ -69,16 +87,15 @@ spec:
             httpGet:
               path: /
               port: http
-            initialDelaySeconds: 60
             periodSeconds: 30
             timeoutSeconds: 5
             failureThreshold: 5
           resources:
             requests:
-              cpu: 100m
-              memory: 256Mi
+              cpu: 250m
+              memory: 512Mi
             limits:
-              memory: 1Gi
+              memory: 1536Mi
           volumeMounts:
             - name: config
               mountPath: /config

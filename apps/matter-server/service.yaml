@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: matter-server
+  namespace: homeassistant
+  labels:
+    app.kubernetes.io/name: matter-server
+    app.kubernetes.io/part-of: infra
+spec:
+  selector:
+    app.kubernetes.io/name: matter-server
+  ports:
+    - name: websocket
+      port: 5580
+      targetPort: websocket
