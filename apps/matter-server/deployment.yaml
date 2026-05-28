@@ -25,28 +25,49 @@ spec:
       dnsPolicy: ClusterFirstWithHostNet
       nodeSelector:
         kubernetes.io/hostname: infra-master
+      hostAliases:
+        - ip: "127.0.0.1"
+          hostnames:
+            - on.dcl.csa-iot.org
+            - on.test-net.dcl.csa-iot.org
       containers:
         - name: matter-server
-          image: ghcr.io/matter-js/python-matter-server:stable
+          image: ghcr.io/matter-js/python-matter-server:8.1.1
           imagePullPolicy: IfNotPresent
           args:
             - --storage-path
             - /data
             - --paa-root-cert-dir
             - /data/credentials
+            - --primary-interface
+            - eth0
+            - --log-level
+            - debug
           ports:
             - name: websocket
               containerPort: 5580
-          volumeMounts:
-            - name: data
-              mountPath: /data
+              hostPort: 5580
+              protocol: TCP
+          env:
+            - name: TZ
+              value: Europe/Stockholm
           resources:
             requests:
               cpu: 100m
               memory: 256Mi
             limits:
               memory: 768Mi
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            - name: dbus
+              mountPath: /run/dbus
+              readOnly: true
       volumes:
         - name: data
           persistentVolumeClaim:
             claimName: matter-server-data
+        - name: dbus
+          hostPath:
+            path: /run/dbus
+            type: Directory
