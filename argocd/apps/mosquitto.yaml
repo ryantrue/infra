@@ -11,7 +11,7 @@ spec:
     path: apps/mosquitto
   destination:
     server: https://kubernetes.default.svc
-    namespace: homeassistant
+    namespace: mosquitto
   syncPolicy:
     automated:
       prune: false
