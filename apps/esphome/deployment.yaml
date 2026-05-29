@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: esphome
+  namespace: esphome
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: esphome
+  template:
+    metadata:
+      labels:
+        app: esphome
+    spec:
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+
+      containers:
+        - name: esphome
+          image: ghcr.io/esphome/esphome:stable
+          imagePullPolicy: IfNotPresent
+
+          args:
+            - dashboard
+            - /config
+            - --address
+            - 0.0.0.0
+            - --port
+            - "6052"
+
+          env:
+            - name: ESPHOME_DASHBOARD_USE_PING
+              value: "true"
+
+          ports:
+            - name: http
+              containerPort: 6052
+              protocol: TCP
+
+          securityContext:
+            privileged: true
+
+          volumeMounts:
+            - name: config
+              mountPath: /config
+            - name: dev
+              mountPath: /dev
+            - name: localtime
+              mountPath: /etc/localtime
+              readOnly: true
+
+      volumes:
+        - name: config
+          hostPath:
+            path: /var/lib/esphome
+            type: DirectoryOrCreate
+        - name: dev
+          hostPath:
+            path: /dev
+            type: Directory
+        - name: localtime
+          hostPath:
+            path: /etc/localtime
+            type: File
